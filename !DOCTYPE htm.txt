@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Liberado — Plano Enterprise 90 Dias</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.development.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.development.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Inter',system-ui,sans-serif;background:#f1f5f9}
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap');
+  .fade-in{opacity:0;transform:translateY(20px);transition:opacity .55s ease,transform .55s ease}
+  .fade-in.visible{opacity:1;transform:translateY(0)}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const {useState,useEffect,useRef} = React;
+
+function useFadeIn(){
+  const ref=useRef(null);
+  const [vis,setVis]=useState(false);
+  useEffect(()=>{
+    const obs=new IntersectionObserver(([e])=>{if(e.isIntersecting){setVis(true);obs.disconnect();}},{threshold:0.08});
+    if(ref.current)obs.observe(ref.current);
+    return()=>obs.disconnect();
+  },[]);
+  return[ref,vis];
+}
+
+function FI({children,delay=0,cls=""}){
+  const[ref,vis]=useFadeIn();
+  return(
+    <div ref={ref} className={cls} style={{opacity:vis?1:0,transform:vis?"translateY(0)":"translateY(20px)",transition:`opacity .55s ease ${delay}ms,transform .55s ease ${delay}ms`}}>
+      {children}
+    </div>
+  );
+}
+
+// ─── Icons (SVG inline) ──────────────────────────────
+const I=({d,size=16,cls=""})=><svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={cls}><path d={d}/></svg>;
+
+const icons={
+  shield:<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>,
+  building:<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="16" height="20" x="4" y="2" rx="2" ry="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01M16 6h.01M12 6h.01M12 10h.01M12 14h.01M16 10h.01M16 14h.01M8 10h.01M8 14h.01"/></svg>,
+  users:<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>,
+  search:<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>,
+  linkedin:<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect width="4" height="12" x="2" y="9"/><circle cx="4" cy="4" r="2"/></svg>,
+  phone:<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.59 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>,
+  bar:<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" x2="18" y1="20" y2="10"/><line x1="12" x2="12" y1="20" y2="4"/><line x1="6" x2="6" y1="20" y2="14"/></svg>,
+  alert:<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>,
+  check:<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>,
+  chevronR:<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"/></svg>,
+  chevronD:<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>,
+  briefcase:<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="14" x="2" y="7" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>,
+  target:<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>,
+  trend:<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>,
+  dollar:<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" x2="12" y1="2" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>,
+  zap:<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>,
+  globe:<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" x2="22" y1="12" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>,
+  fileSearch:<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 22h14a2 2 0 0 0 2-2V7l-5-5H6a2 2 0 0 0-2 2v3"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><circle cx="5" cy="17" r="3"/><path d="m9 21-1.5-1.5"/></svg>,
+  db:<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>,
+  finger:<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 10a2 2 0 0 0-2 2c0 1.02-.1 2.51-.26 4"/><path d="M14 13.12c0 2.38 0 6.38-1 8.88"/><path d="M17.29 21.02c.12-.6.43-2.3.5-3.02"/><path d="M2 12a10 10 0 0 1 18-6"/><path d="M2 17h2.5"/><path d="M21.97 7c-.16-.93-.5-2.06-1.03-3"/><path d="M6.11 3.59A10 10 0 0 0 2 12"/><path d="M6 12a6 6 0 0 1 6-6"/><path d="M7 16.87A5 5 0 0 1 7 12"/><path d="M16 6a6 6 0 0 1 1.98 4.37"/><path d="M17.5 12c0 .6-.06 1.16-.15 1.71"/></svg>,
+  brain:<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 4.44-2.04Z"/><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-4.44-2.04Z"/></svg>,
+  scale:<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="M7 21h10"/><path d="M12 3v18"/><path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"/></svg>,
+  arrow:<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>,
+  pkg:<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>,
+  award:<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg>,
+  warn:<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>,
+  badge:<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"/><path d="m9 12 2 2 4-4"/></svg>,
+  clock:<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>,
+  cross:<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>,
+  yt:<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2.5 17a24.12 24.12 0 0 1 0-10 2 2 0 0 1 1.4-1.4 49.56 49.56 0 0 1 16.2 0A2 2 0 0 1 21.5 7a24.12 24.12 0 0 1 0 10 2 2 0 0 1-1.4 1.4 49.55 49.55 0 0 1-16.2 0A2 2 0 0 1 2.5 17"/><path d="m10 15 5-3-5-3z"/></svg>,
+  ig:<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg>,
+  refresh:<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>,
+  checkcheck:<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 7 17l-5-5"/><path d="m22 10-7.5 7.5L13 16"/></svg>,
+  xcircle:<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg>,
+  filetext:<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>,
+  monitor:<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="14" x="2" y="3" rx="2"/><path d="M8 21h8"/><path d="M12 17v4"/><polygon points="10,7 16,11 10,15"/></svg>,
+  usercheck:<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><polyline points="16 11 18 13 22 9"/></svg>,
+};
+
+function SectionHeader({icon,number,title}){
+  return(
+    <div className="flex items-center gap-4">
+      <div className="flex items-center justify-center w-9 h-9 bg-indigo-600 text-white rounded-xl shrink-0">{icon}</div>
+      <div className="flex items-center gap-3">
+        <span className="text-xs font-bold text-indigo-500 bg-indigo-50 border border-indigo-100 px-2 py-0.5 rounded-full">{number}</span>
+        <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-slate-900">{title}</h2>
+      </div>
+    </div>
+  );
+}
+
+function Card({children,cls=""}){
+  return <div className={`bg-white rounded-3xl border border-slate-200 shadow-sm ${cls}`}>{children}</div>;
+}
+
+function StatCard({value,label,sub,accent="indigo",delay=0}){
+  const borders={indigo:"border-t-indigo-500",red:"border-t-red-500",amber:"border-t-amber-500",green:"border-t-emerald-500"};
+  return(
+    <FI delay={delay}>
+      <div className={`bg-white p-8 rounded-3xl border border-slate-200 shadow-sm border-t-4 h-full ${borders[accent]}`}>
+        <p className="text-4xl font-extrabold text-slate-900 mb-2">{value}</p>
+        <p className="text-sm font-bold text-slate-700 leading-snug">{label}</p>
+        {sub&&<p className="text-xs text-slate-400 mt-2">{sub}</p>}
+      </div>
+    </FI>
+  );
+}
+
+function FunnelBoard(){
+  const stages=[
+    {label:"TRÁFEGO",bg:"bg-slate-50 border-slate-200",header:"bg-slate-800 text-white",nodes:[
+      {Icon:icons.yt,name:"YouTube",sub:"Orgânico + Ads",color:"bg-rose-100 text-rose-700 border-rose-200"},
+      {Icon:icons.search,name:"Google Ads",sub:"Search + Display",color:"bg-blue-100 text-blue-700 border-blue-200"},
+      {Icon:icons.linkedin,name:"LinkedIn Ads",sub:"Sponsored Content",color:"bg-indigo-100 text-indigo-700 border-indigo-200"},
+      {Icon:icons.ig,name:"Meta Ads",sub:"Instagram + Facebook",color:"bg-violet-100 text-violet-700 border-violet-200"},
+    ]},
+    {label:"LANDING PAGES",bg:"bg-indigo-50 border-indigo-200",header:"bg-indigo-600 text-white",nodes:[
+      {Icon:icons.filetext,name:"LP Principal",sub:"Oferta + CTA Enterprise",color:"bg-indigo-100 text-indigo-700 border-indigo-200"},
+      {Icon:icons.filetext,name:"LP Coleta Dados",sub:"Webinar / Lead magnet",color:"bg-indigo-100 text-indigo-700 border-indigo-200"},
+    ]},
+    {label:"QUALIFICAÇÃO",bg:"bg-amber-50 border-amber-200",header:"bg-amber-500 text-white",nodes:[
+      {Icon:icons.fileSearch,name:"Formulário Nativa",sub:"BANT / Dados ICP",color:"bg-amber-100 text-amber-700 border-amber-200"},
+      {Icon:icons.users,name:"Equipe Comercial",sub:"SDR + BDR + Closer",color:"bg-orange-100 text-orange-700 border-orange-200"},
+    ]},
+    {label:"RESULTADO",bg:"bg-slate-50 border-slate-200",header:"bg-slate-700 text-white",nodes:[
+      {Icon:icons.checkcheck,name:"Vendido ✓",sub:"Contrato Enterprise",color:"bg-emerald-100 text-emerald-700 border-emerald-200"},
+      {Icon:icons.xcircle,name:"Não Vendido ✗",sub:"→ Remarketing",color:"bg-red-100 text-red-700 border-red-200"},
+      {Icon:icons.refresh,name:"Remarketing",sub:"Reengajamento 30–60d",color:"bg-amber-100 text-amber-700 border-amber-200"},
+    ]},
+  ];
+  return(
+    <div className="w-full overflow-x-auto">
+      <div className="flex gap-3 min-w-[700px] items-start">
+        {stages.map((stage,si)=>(
+          <React.Fragment key={si}>
+            <div className={`flex-1 rounded-2xl border ${stage.bg} overflow-hidden`} style={{minWidth:155}}>
+              <div className={`px-3 py-2 text-[10px] font-bold uppercase tracking-widest text-center ${stage.header}`}>{stage.label}</div>
+              <div className="p-3 space-y-2">
+                {stage.nodes.map((node,ni)=>(
+                  <div key={ni} className={`flex items-center gap-2 p-2 rounded-xl border text-xs font-semibold ${node.color}`}>
+                    <span className="shrink-0">{node.Icon}</span>
+                    <div><div className="font-bold leading-tight">{node.name}</div><div className="text-[9px] font-normal opacity-70 leading-tight">{node.sub}</div></div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            {si<stages.length-1&&(
+              <div className="flex items-center self-stretch">
+                <div className="flex flex-col items-center justify-center w-8 h-full">
+                  <div className="w-px flex-1 bg-slate-200"/>
+                  <span className="text-slate-400 shrink-0 my-1">{icons.chevronR}</span>
+                  <div className="w-px flex-1 bg-slate-200"/>
+                </div>
+              </div>
+            )}
+          </React.Fragment>
+        ))}
+      </div>
+      <div className="mt-4 flex items-start gap-3 p-4 rounded-2xl bg-slate-900 text-white">
+        <span className="text-amber-400 shrink-0 mt-0.5">{icons.refresh}</span>
+        <p className="text-xs leading-relaxed text-slate-300"><span className="font-bold text-amber-400">Loop de Remarketing:</span> Leads "Não Vendido" são inseridos em sequência de reengajamento via Google + Meta Ads + e-mail, retornando ao funil após 30–60 dias.</p>
+      </div>
+    </div>
+  );
+}
+
+function App(){
+  const[activeMonth,setActiveMonth]=useState(0);
+  const months=[
+    {label:"Mês 1 — Fundação",color:"indigo",phase:"DIAS 1–30 · POSICIONAMENTO E ESTRUTURA",areas:[
+      {name:"Posicionamento",items:["Redefinir copy Enterprise em todos os canais digitais","Criar página de vendas focada em risco jurídico e compliance","Reposicionar Google Ads e LinkedIn Ads para persona Enterprise"]},
+      {name:"ICP e Listas ABM",items:["Construir lista inicial de 500 contas ICP por segmento e região","Validar critérios de qualificação com time comercial","Configurar LinkedIn Sales Navigator e ferramentas de SDR"]},
+      {name:"Time e Processo",items:["Contratar ou realocar SDR (outbound) e BDR (inbound)","Treinamento intensivo: produto, ICP, cadência e objeções","Configurar CRM com pipelines Enterprise separados de PME"]},
+      {name:"Materiais",items:["Criar pitch deck e one-pager Enterprise com foco em risco","Produzir lead magnet: Guia de Compliance para Operações de Alto Volume"]},
+    ]},
+    {label:"Mês 2 — Escala",color:"violet",phase:"DIAS 31–60 · ATIVAÇÃO DE CANAIS",areas:[
+      {name:"Outbound Ativo",items:["Ativar cadência ABM para 200 contas por semana","SDR: mínimo 50 contatos diários por canal","Meta acumulada: 15 reuniões qualificadas no mês"]},
+      {name:"Inbound Enterprise",items:["Publicar lead magnet e ativar campanhas segmentadas Enterprise","Iniciar remarketing para visitantes qualificados","BDR ativo 100% na qualificação e desqualificação rápida"]},
+      {name:"Pipeline",items:["Primeiras reuniões de diagnóstico com Closer Enterprise","Propostas Enterprise com custo do problema calculado","Refinamento de ICP com base nos dados reais das reuniões"]},
+      {name:"Operação",items:["Revisão semanal de pipeline (deal review estruturado)","Ajuste de copy e cadência com base em objeções reais","Relatório parcial de performance: Mês 1 → Mês 2"]},
+    ]},
+    {label:"Mês 3 — Fechamento",color:"emerald",phase:"DIAS 61–90 · OTIMIZAÇÃO E CONTRATOS",areas:[
+      {name:"Fechamento",items:["Foco total em contratos em negociação avançada no pipeline","Closing call com decisor e apresentação de ROI documentado","Ativação de contratos anuais com onboarding estruturado"]},
+      {name:"Remarketing",items:["Reengajamento para leads que abriram e-mails sem resposta","Sequência de breakup com oferta de diagnóstico gratuito","Webinar exclusivo para prospects em fase de avaliação"]},
+      {name:"Expansão",items:["Cross-sell API e consultas em massa para clientes ativados","Indicações estruturadas via primeiros contratos fechados","Análise de NPS e ajuste do processo de onboarding"]},
+      {name:"Retrospectiva",items:["Análise completa: conversão por canal e segmento","Relatório executivo de 90 dias para liderança","Planejamento do ciclo 90–180 dias com base nos dados"]},
+    ]},
+  ];
+  const mc={
+    indigo:{tab:"bg-indigo-600 text-white",icon:"text-indigo-500",bar:"bg-indigo-500"},
+    violet:{tab:"bg-violet-600 text-white",icon:"text-violet-500",bar:"bg-violet-500"},
+    emerald:{tab:"bg-emerald-600 text-white",icon:"text-emerald-500",bar:"bg-emerald-500"},
+  }[months[activeMonth].color];
+
+  return(
+    <div className="min-h-screen bg-slate-100 text-slate-900">
+
+      {/* HERO */}
+      <header className="relative bg-slate-900 text-white pt-20 pb-16 overflow-hidden">
+        <div className="absolute top-0 right-0 w-1/2 h-full bg-indigo-600/10 -skew-x-12 translate-x-1/4"/>
+        <div className="absolute bottom-0 left-0 w-80 h-80 bg-indigo-800/20 rounded-full blur-3xl -translate-x-1/2 translate-y-1/2 pointer-events-none"/>
+        <div className="max-w-5xl mx-auto px-6 relative z-10">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/20 text-indigo-300 text-xs font-bold uppercase tracking-wider mb-6 border border-indigo-500/30">
+            <span>{icons.shield}</span> Plano Estratégico Enterprise · 90 Dias
+          </div>
+          <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight mb-5 leading-tight">
+            Liberado: <span className="text-indigo-400">Crescimento Enterprise</span>
+          </h1>
+          <p className="text-slate-400 text-lg max-w-2xl mb-10 leading-relaxed">
+            Plano estratégico de 90 dias para escalar contratos Enterprise acima de R$&nbsp;3.000/mês com foco em outbound ABM, compliance e prevenção de risco jurídico.
+          </p>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 border-t border-slate-800 pt-8">
+            {[{label:"Meta de Reuniões",value:"40 qualificadas"},{label:"Contratos Esperados",value:"8–12 Enterprise"},{label:"MRR Projetado",value:"+ R$ 65 mil"},{label:"Horizonte",value:"90 dias"}].map((m,i)=>(
+              <div key={i}><p className="text-slate-500 uppercase font-bold tracking-widest text-[10px] mb-1">{m.label}</p><p className="font-semibold text-white">{m.value}</p></div>
+            ))}
+          </div>
+        </div>
+      </header>
+
+      <main className="max-w-5xl mx-auto px-6 py-20 space-y-28">
+
+        {/* 00 FUNIL */}
+        <section className="space-y-8">
+          <FI><SectionHeader icon={icons.target} number="00" title="Funil de Captação — Visão Geral"/></FI>
+          <FI delay={80}>
+            <div className="bg-amber-50 border-l-4 border-amber-400 p-5 rounded-r-2xl">
+              <div className="flex gap-3">
+                <span className="text-amber-500 shrink-0 mt-0.5">{icons.alert}</span>
+                <p className="text-sm text-amber-800 leading-relaxed">Fluxo mapeado diretamente do board estratégico. Estrutura de 4 etapas: <strong>Tráfego → Landing Pages → Qualificação → Resultado</strong>, com loop de remarketing para leads não convertidos.</p>
+              </div>
+            </div>
+          </FI>
+          <FI delay={150}><Card cls="p-6 md:p-8"><FunnelBoard/></Card></FI>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <FI delay={200}>
+              <Card cls="p-7">
+                <p className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-5">Fontes de Tráfego</p>
+                <div className="space-y-3">
+                  {[
+                    {icon:icons.yt,label:"YouTube",detail:"Vídeos orgânicos + YouTube Ads para awareness",color:"text-rose-500 bg-rose-50"},
+                    {icon:icons.search,label:"Google Ads + Adwords",detail:"Search Enterprise + Display remarketing para decisores",color:"text-blue-500 bg-blue-50"},
+                    {icon:icons.linkedin,label:"LinkedIn Ads",detail:"Sponsored Content + InMail para Diretores e C-level",color:"text-indigo-500 bg-indigo-50"},
+                    {icon:icons.ig,label:"Meta Ads (IG + FB)",detail:"Campanha de awareness + retargeting para visitantes",color:"text-violet-500 bg-violet-50"},
+                  ].map((ch,i)=>(
+                    <div key={i} className="flex items-center gap-3 p-3 rounded-xl bg-slate-50 border border-slate-100">
+                      <div className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${ch.color}`}>{ch.icon}</div>
+                      <div><p className="text-xs font-bold text-slate-800">{ch.label}</p><p className="text-[11px] text-slate-500 leading-tight">{ch.detail}</p></div>
+                    </div>
+                  ))}
+                </div>
+              </Card>
+            </FI>
+            <FI delay={280}>
+              <Card cls="p-7 flex flex-col gap-4">
+                <p className="text-xs font-bold uppercase tracking-widest text-slate-400">Etapas do Funil</p>
+                <div className="space-y-3 flex-1">
+                  {[
+                    {step:"1",label:"LP Principal",desc:"Captura do lead Enterprise com proposta de valor focada em risco",color:"bg-indigo-600"},
+                    {step:"2",label:"LP Coleta de Dados",desc:"Webinar / lead magnet para coletar cargo, empresa e volume",color:"bg-indigo-400"},
+                    {step:"3",label:"Formulário Nativa",desc:"Qualificação BANT: Budget, Authority, Need, Timeline",color:"bg-amber-500"},
+                    {step:"4",label:"Equipe Comercial",desc:"SDR agenda reunião de diagnóstico. Closer conduz negociação",color:"bg-slate-700"},
+                    {step:"5",label:"Vendido / Loop",desc:"Contrato assinado → Onboarding. Não vendido → Remarketing 30–60d",color:"bg-emerald-600"},
+                  ].map((st,i)=>(
+                    <div key={i} className="flex items-start gap-3">
+                      <span className={`flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-extrabold text-white ${st.color}`}>{st.step}</span>
+                      <div><p className="text-xs font-bold text-slate-800">{st.label}</p><p className="text-[11px] text-slate-500 leading-tight">{st.desc}</p></div>
+                    </div>
+                  ))}
+                </div>
+                <div className="p-3 bg-amber-50 rounded-xl border border-amber-200 flex gap-2">
+                  <span className="text-amber-500 shrink-0 mt-0.5">{icons.refresh}</span>
+                  <p className="text-[11px] text-amber-700 font-medium leading-relaxed"><strong>Remarketing loop:</strong> Não vendidos reentram via Google + Meta Ads após 30–60 dias.</p>
+                </div>
+              </Card>
+            </FI>
+          </div>
+        </section>
+
+        {/* 01 RISCO */}
+        <section className="space-y-8">
+          <FI><SectionHeader icon={icons.warn} number="01" title="O Custo do Risco Não Gerenciado"/></FI>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <StatCard value="R$ 47 bi" label="Perdas anuais com fraude corporativa no Brasil" sub="Fonte: ACFE Brasil" accent="red" delay={0}/>
+            <StatCard value="68%" label="Das empresas relatam contratações problemáticas sem background check" sub="SHRM 2023" accent="amber" delay={100}/>
+            <StatCard value="3,2x" label="Custo médio de rescisão por justa causa vs. contratação estruturada" sub="ABRH" accent="indigo" delay={200}/>
+          </div>
+          <FI delay={300}>
+            <div className="bg-amber-50 border-l-4 border-amber-400 p-6 rounded-r-2xl">
+              <div className="flex gap-4">
+                <span className="text-amber-500 shrink-0 mt-0.5">{icons.alert}</span>
+                <p className="text-sm text-amber-800 leading-relaxed">Empresas sem processo estruturado de validação expõem-se a <strong>risco jurídico, financeiro e reputacional</strong> evitável. Cada contratação sem background check é uma contingência passiva no balanço.</p>
+              </div>
+            </div>
+          </FI>
+        </section>
+
+        {/* 02 OPORTUNIDADE */}
+        <section className="space-y-8">
+          <FI><SectionHeader icon={icons.trend} number="02" title="Oportunidade de Mercado Enterprise"/></FI>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <FI delay={100} cls="space-y-4">
+              {[
+                {icon:icons.trend,text:"Mercado de background check no Brasil cresce 18% a.a., impulsionado por LGPD e regulações do BACEN."},
+                {icon:icons.target,text:"Segmentos Enterprise representam 60% do TAM: Fintechs, BPOs e Logística lideram a demanda."},
+                {icon:icons.dollar,text:"Ticket médio Enterprise: R$ 5.000 a R$ 25.000/mês — alto LTV, baixo churn por dependência operacional."},
+                {icon:icons.zap,text:"Janela de oportunidade: consolidação em curso. Poucos players com produto completo e API moderna."},
+              ].map((item,i)=>(
+                <Card key={i} cls="p-5 flex gap-4">
+                  <div className="w-8 h-8 bg-indigo-50 rounded-xl flex items-center justify-center shrink-0 text-indigo-600">{item.icon}</div>
+                  <p className="text-sm text-slate-600 leading-relaxed">{item.text}</p>
+                </Card>
+              ))}
+            </FI>
+            <FI delay={200}>
+              <div className="bg-slate-900 text-white rounded-3xl p-8 h-full relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-48 h-48 bg-indigo-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3 pointer-events-none"/>
+                <p className="text-xs font-bold text-indigo-400 uppercase tracking-widest mb-6 relative z-10">Dimensão do Mercado</p>
+                <div className="space-y-5 relative z-10">
+                  {[
+                    {label:"TAM — Total Addressable Market",value:"R$ 2,4 bi",w:"100%"},
+                    {label:"SAM — Enterprise B2B Brasil",value:"R$ 680 mi",w:"28%"},
+                    {label:"SOM — Meta 12 meses",value:"R$ 4,8 mi",w:"1%"},
+                  ].map((m,i)=>(
+                    <div key={i}>
+                      <div className="flex justify-between mb-1.5"><span className="text-xs text-slate-400">{m.label}</span><span className="text-xs font-bold text-white">{m.value}</span></div>
+                      <div className="h-1.5 bg-white/10 rounded-full overflow-hidden"><div className="h-full bg-indigo-500 rounded-full" style={{width:m.w}}/></div>
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-8 p-4 bg-white/5 rounded-2xl border border-white/10 relative z-10">
+                  <p className="text-xs text-slate-300 leading-relaxed">Crescimento de <strong className="text-white">18% a.a.</strong> Regulações de KYC/AML e LGPD impulsionam demanda estrutural.</p>
+                </div>
+              </div>
+            </FI>
+          </div>
+        </section>
+
+        {/* 03 PRODUTO */}
+        <section className="space-y-8">
+          <FI><SectionHeader icon={icons.pkg} number="03" title="Produto e Posicionamento"/></FI>
+          <FI delay={100}>
+            <div className="bg-indigo-900 text-white p-8 md:p-10 rounded-3xl relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none"/>
+              <div className="relative z-10">
+                <p className="text-xs font-bold uppercase tracking-widest text-indigo-300 mb-2">Plataforma Completa de Validação</p>
+                <h3 className="text-2xl font-bold mb-2">Liberado — Background Check & Compliance B2B</h3>
+                <p className="text-indigo-200 text-sm mb-8 max-w-xl">Infraestrutura de risco corporativo para operações Enterprise que exigem governança, rastreabilidade e due diligence comprovada.</p>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                  {[
+                    {icon:icons.fileSearch,name:"Background Check",desc:"CPF / CNPJ, antecedentes criminais e processos judiciais"},
+                    {icon:icons.bar,name:"Score de Crédito",desc:"Risco de crédito com bureaus integrados e dados públicos"},
+                    {icon:icons.finger,name:"Biometria e Liveness",desc:"Verificação facial ao vivo com IA anti-fraude"},
+                    {icon:icons.brain,name:"Análise Documental",desc:"Extração e validação de documentos com IA"},
+                    {icon:icons.scale,name:"Dossiê Jurídico",desc:"Relatório consolidado para due diligence"},
+                    {icon:icons.db,name:"API e Consultas em Massa",desc:"Integração REST ou uploads em lote para alto volume"},
+                  ].map((p,i)=>(
+                    <div key={i} className="bg-white/5 p-5 rounded-2xl border border-white/10">
+                      <span className="text-indigo-400 mb-3 block">{p.icon}</span>
+                      <p className="text-xs font-bold text-white mb-1">{p.name}</p>
+                      <p className="text-[11px] text-slate-400 leading-relaxed">{p.desc}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </FI>
+        </section>
+
+        {/* 04 ICP */}
+        <section className="space-y-8">
+          <FI><SectionHeader icon={icons.cross} number="04" title="Perfil do Cliente Ideal (ICP) Enterprise"/></FI>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <FI delay={100}>
+              <Card cls="p-8 h-full">
+                <h3 className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-6 flex items-center gap-2"><span>{icons.building}</span> Critérios de Entrada</h3>
+                <ul className="space-y-4">
+                  {["100 a 500+ contratações por mês","Exposição a risco jurídico ou regulatório comprovado","Operação com múltiplas unidades, filiais ou terceiros","Faturamento anual acima de R$ 10 milhões","Ausência ou limitação do processo atual de validação","Decisor com autoridade real de compra (Diretor / C-level)"].map((item,i)=>(
+                    <li key={i} className="flex gap-3 text-slate-700 text-sm font-medium">
+                      <span className="text-indigo-500 shrink-0 mt-0.5">{icons.check}</span>{item}
+                    </li>
+                  ))}
+                </ul>
+              </Card>
+            </FI>
+            <FI delay={200} cls="space-y-5">
+              <Card cls="p-8">
+                <h3 className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-5 flex items-center gap-2"><span>{icons.users}</span> Decisores-Alvo</h3>
+                <div className="grid grid-cols-2 gap-3">
+                  {["CEO / Sócio-Fundador","COO / Dir. de Operações","Head de RH / People","Head Jurídico","Head de Compliance","Diretor Financeiro (CFO)"].map((r,i)=>(
+                    <div key={i} className="p-3 bg-slate-50 rounded-xl text-xs font-bold text-slate-700 border border-slate-100">{r}</div>
+                  ))}
+                </div>
+              </Card>
+              <Card cls="p-6 border-l-4 border-l-indigo-500">
+                <p className="text-xs font-bold uppercase tracking-widest text-indigo-600 mb-3">Regiões Prioritárias</p>
+                <div className="flex flex-wrap gap-2">
+                  {["SP","RJ","MG","PR","SC","BA","PE","CE"].map((r)=>(
+                    <span key={r} className="px-3 py-1 bg-indigo-50 text-indigo-700 text-xs font-bold rounded-full border border-indigo-100">{r}</span>
+                  ))}
+                </div>
+                <p className="text-xs text-slate-400 mt-3">Sudeste · Sul · Nordeste</p>
+              </Card>
+            </FI>
+          </div>
+        </section>
+
+        {/* 05 SEGMENTOS */}
+        <section className="space-y-8">
+          <FI><SectionHeader icon={icons.globe} number="05" title="Segmentos Prioritários"/></FI>
+          <div className="space-y-4">
+            {[
+              {num:"01",name:"Call Centers / BPO",reason:"Alto turnover e risco de fraude interna. Exigência de compliance BACEN.",border:"border-l-indigo-500"},
+              {num:"02",name:"Fintechs / Meios de Pagamento",reason:"Obrigação regulatória de KYC/AML. Multas milionárias por não conformidade.",border:"border-l-amber-500"},
+              {num:"03",name:"Facilities / Segurança / Limpeza",reason:"Contratação em massa com alto risco de antecedentes críticos.",border:"border-l-emerald-500"},
+              {num:"04",name:"Logística e Transportadoras",reason:"Acesso a ativos de alto valor. Risco comprovado de roubo e desvio.",border:"border-l-rose-500"},
+              {num:"05",name:"Varejo com Múltiplas Lojas",reason:"Gestão descentralizada com inconsistência de processo e exposição trabalhista.",border:"border-l-violet-500"},
+            ].map((seg,i)=>(
+              <FI key={i} delay={i*80}>
+                <Card cls={`p-6 border-l-4 ${seg.border}`}>
+                  <div className="flex items-start gap-5">
+                    <span className="text-2xl font-extrabold text-slate-200 shrink-0 w-10">{seg.num}</span>
+                    <div><p className="font-bold text-slate-900 mb-1">{seg.name}</p><p className="text-sm text-slate-500 leading-relaxed">{seg.reason}</p></div>
+                  </div>
+                </Card>
+              </FI>
+            ))}
+          </div>
+        </section>
+
+        {/* 06 ESTRATÉGIA */}
+        <section className="space-y-8">
+          <FI><SectionHeader icon={icons.target} number="06" title="Estratégia de Aquisição"/></FI>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <FI delay={100} cls="md:col-span-2">
+              <div className="bg-slate-900 text-white rounded-3xl p-8 h-full relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-56 h-56 bg-indigo-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3 pointer-events-none"/>
+                <div className="relative z-10">
+                  <div className="flex items-center gap-3 mb-5">
+                    <span className="text-indigo-400">{icons.phone}</span>
+                    <p className="font-bold text-white">Outbound ABM — 70% do esforço</p>
+                    <span className="ml-auto px-2 py-0.5 bg-indigo-500/20 text-indigo-300 text-xs font-bold rounded-full border border-indigo-500/30">Prioridade</span>
+                  </div>
+                  <div className="grid grid-cols-3 gap-4 mb-6">
+                    {[
+                      {label:"Lista Fechada",desc:"ABM: 100–300 contas ICP por segmento, porte e risco"},
+                      {label:"Cadência Multicanal",desc:"LinkedIn + e-mail + telefone. 8–12 touchpoints/conta"},
+                      {label:"Copy de Risco",desc:"Mensagem centrada em custo do problema e exposição jurídica"},
+                    ].map((c,i)=>(
+                      <div key={i} className="bg-white/5 p-4 rounded-2xl border border-white/10">
+                        <p className="text-indigo-400 font-bold text-xs mb-2">{c.label}</p>
+                        <p className="text-xs text-slate-300 leading-relaxed">{c.desc}</p>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="p-4 bg-white/5 rounded-2xl border border-white/10 flex gap-3">
+                    <span className="text-indigo-400 shrink-0 mt-0.5">{icons.briefcase}</span>
+                    <p className="text-xs text-slate-300 leading-relaxed">Enterprise não responde a pitch direto. Responde a <strong className="text-white">provocação estratégica</strong> e diagnóstico de risco.</p>
+                  </div>
+                </div>
+              </div>
+            </FI>
+            <FI delay={200}>
+              <Card cls="p-7 h-full flex flex-col">
+                <div className="flex items-center gap-2 mb-5">
+                  <span className="text-slate-400">{icons.search}</span>
+                  <p className="font-bold text-slate-700 text-sm">Inbound — 30%</p>
+                </div>
+                <ul className="space-y-3 mb-5 flex-1">
+                  {["Google Ads + LinkedIn Ads para Enterprise","Copy focada em risco jurídico e financeiro","Lead magnet para grandes empresas","BDR dedicado à qualificação ágil"].map((item,i)=>(
+                    <li key={i} className="flex gap-2 text-slate-600 text-xs">
+                      <span className="text-indigo-500 shrink-0 mt-0.5">{icons.chevronR}</span>{item}
+                    </li>
+                  ))}
+                </ul>
+                <div className="p-4 bg-red-50 rounded-2xl border border-red-100">
+                  <p className="text-xs font-bold text-red-700 mb-1">Desqualificação Ativa</p>
+                  <p className="text-xs text-red-600">PME e tickets abaixo de R$ 3.000/mês são descartados imediatamente.</p>
+                </div>
+              </Card>
+            </FI>
+          </div>
+          <FI delay={200}>
+            <Card cls="p-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                <div>
+                  <p className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-4">Palavras-chave a eliminar (PME)</p>
+                  <div className="flex flex-wrap gap-2">
+                    {["consulta CPF online","antecedente criminal online","verificar CPF grátis","consulta CNPJ"].map((k)=>(
+                      <span key={k} className="px-3 py-1 rounded-full text-[11px] font-bold border bg-red-50 text-red-500 border-red-100 line-through">{k}</span>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <p className="text-xs font-bold uppercase tracking-widest text-indigo-500 mb-4">Palavras-chave Enterprise (ouro)</p>
+                  <div className="flex flex-wrap gap-2">
+                    {["background check corporativo","plataforma compliance empresas","KYC corporativo Brasil","homologação fornecedores","due diligence automatizado"].map((k)=>(
+                      <span key={k} className="px-3 py-1 rounded-full text-[11px] font-bold border bg-indigo-100 text-indigo-700 border-indigo-200">{k}</span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </Card>
+          </FI>
+        </section>
+
+        {/* 07 CADÊNCIA */}
+        <section className="space-y-8">
+          <FI><SectionHeader icon={icons.linkedin} number="07" title="Processo Outbound ABM — Cadência"/></FI>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <FI delay={100} cls="space-y-5">
+              <Card cls="p-7 border-l-4 border-l-red-400">
+                <p className="text-xs font-bold uppercase tracking-widest text-red-600 mb-3">Abordagem a Evitar</p>
+                <div className="p-4 bg-red-50 text-red-800 rounded-xl text-sm italic border border-red-100">"Vi que você acessou o site e gostaria de apresentar nossos planos e valores..."</div>
+              </Card>
+              <Card cls="p-7 border-l-4 border-l-indigo-500">
+                <p className="text-xs font-bold uppercase tracking-widest text-indigo-600 mb-3">Abordagem Estratégica (Ideal)</p>
+                <div className="p-4 bg-indigo-50 text-indigo-900 rounded-xl text-sm italic border border-indigo-100">"Muitas empresas do seu segmento estão sendo responsabilizadas por falhas em homologação. Como vocês estruturam o due diligence de terceiros hoje?"</div>
+              </Card>
+            </FI>
+            <FI delay={200}>
+              <Card cls="p-7 h-full">
+                <p className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-6">Cadência de 8–12 Touchpoints</p>
+                <div className="space-y-3">
+                  {[
+                    {day:"Dia 1",action:"E-mail personalizado com dado de risco do segmento"},
+                    {day:"Dia 3",action:"Conexão + InMail no LinkedIn"},
+                    {day:"Dia 5",action:"Ligação consultiva — foco na dor, não no produto"},
+                    {day:"Dia 8",action:"Follow-up e-mail com caso de uso relevante"},
+                    {day:"Dia 10",action:"Vídeo personalizado de 60s via LinkedIn"},
+                    {day:"Dia 12",action:"E-mail de encerramento com oferta de diagnóstico gratuito"},
+                  ].map((s,i)=>(
+                    <div key={i} className="flex items-start gap-3 text-sm">
+                      <span className="text-xs font-bold text-indigo-600 w-12 shrink-0 mt-0.5">{s.day}</span>
+                      <span className="text-slate-300 shrink-0 mt-1">{icons.arrow}</span>
+                      <span className="text-slate-600">{s.action}</span>
+                    </div>
+                  ))}
+                </div>
+              </Card>
+            </FI>
+          </div>
+        </section>
+
+        {/* 08 TIME */}
+        <section className="space-y-8">
+          <FI><SectionHeader icon={icons.users} number="08" title="Time Comercial Enterprise"/></FI>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {[
+              {role:"SDR — Outbound",top:"border-t-indigo-500",kpis:["20 reuniões/mês","Conv. ≥ 8%"],items:["Prospecção ativa via LinkedIn, telefone e e-mail","Cadência ABM: 8–12 touchpoints/conta","50+ contatos diários por canal","Qualificação por ICP antes de passar ao Closer"]},
+              {role:"BDR — Inbound",top:"border-t-amber-500",kpis:["20 leads qualif./mês","Qualif. ≥ 35%"],items:["Qualificação inbound com BANT/MEDDIC","Desqualificação imediata de PME e ticket < R$ 3k","Entrega de leads qualificados ao Closer","Acompanhamento de campanha e ajuste de copy"]},
+              {role:"Closer / AE",top:"border-t-emerald-500",kpis:["8–12 contratos/90d","Ciclo ≤ 21 dias"],items:["Reunião de diagnóstico e proposta","Negociação de contratos anuais","Cálculo de ROI e custo do risco atual","Handoff estruturado para onboarding"]},
+            ].map((r,i)=>(
+              <FI key={i} delay={i*100}>
+                <Card cls={`p-7 border-t-4 ${r.top} h-full flex flex-col`}>
+                  <p className="font-bold text-slate-900 mb-3">{r.role}</p>
+                  <div className="flex gap-2 flex-wrap mb-5">
+                    {r.kpis.map((k)=><span key={k} className="px-2 py-0.5 text-[10px] font-bold rounded-full bg-slate-100 text-slate-600 border border-slate-200">{k}</span>)}
+                  </div>
+                  <ul className="space-y-2.5 flex-1">
+                    {r.items.map((item,j)=>(
+                      <li key={j} className="flex gap-2 text-xs text-slate-600">
+                        <span className="text-emerald-500 shrink-0 mt-0.5">{icons.check}</span>{item}
+                      </li>
+                    ))}
+                  </ul>
+                </Card>
+              </FI>
+            ))}
+          </div>
+        </section>
+
+        {/* 09 CRONOGRAMA */}
+        <section className="space-y-8">
+          <FI><SectionHeader icon={icons.clock} number="09" title="Cronograma de 90 Dias"/></FI>
+          <div className="flex gap-3 flex-wrap">
+            {months.map((m,i)=>(
+              <button key={i} onClick={()=>setActiveMonth(i)}
+                className={`px-5 py-2 rounded-full text-sm font-bold transition-all cursor-pointer border ${i===activeMonth?mc.tab:"bg-white text-slate-500 border-slate-200"}`}>
+                {m.label}
+              </button>
+            ))}
+          </div>
+          <div>
+            <div className={`h-1 w-20 rounded-full mb-5 ${mc.bar}`}/>
+            <p className={`text-xs font-bold uppercase tracking-widest mb-6 ${mc.icon}`}>{months[activeMonth].phase}</p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              {months[activeMonth].areas.map((area,i)=>(
+                <Card key={i} cls="p-7">
+                  <p className={`text-xs font-bold uppercase tracking-widest mb-4 ${mc.icon}`}>{area.name}</p>
+                  <ul className="space-y-2.5">
+                    {area.items.map((item,j)=>(
+                      <li key={j} className="flex gap-2 text-sm text-slate-600">
+                        <span className={`${mc.icon} shrink-0 mt-0.5`}>{icons.chevronR}</span>{item}
+                      </li>
+                    ))}
+                  </ul>
+                </Card>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* 10 KPIs */}
+        <section className="space-y-8">
+          <FI><SectionHeader icon={icons.bar} number="10" title="Metas e KPIs — 90 Dias"/></FI>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-5">
+            <StatCard value="40" label="Reuniões Qualificadas" sub="Total em 90 dias" accent="indigo" delay={0}/>
+            <StatCard value="50%" label="Conv. Reunião→Proposta" sub="Taxa mínima aceitável" accent="amber" delay={80}/>
+            <StatCard value="8–12" label="Contratos Enterprise" sub="Meta de fechamento" accent="green" delay={160}/>
+            <StatCard value="R$ 6.500/mês" label="Ticket Médio" sub="Meta de ACV" accent="indigo" delay={240}/>
+            <StatCard value="R$ 65 mil" label="MRR Adicionado" sub="Meta mínima 90 dias" accent="green" delay={320}/>
+            <StatCard value="≤ R$ 4.200" label="CAC Enterprise" sub="Custo máximo aquisição" accent="amber" delay={400}/>
+          </div>
+        </section>
+
+        {/* 11 RISCOS */}
+        <section className="space-y-8">
+          <FI><SectionHeader icon={icons.alert} number="11" title="Riscos e Mitigações"/></FI>
+          <div className="space-y-4">
+            {[
+              {risk:"Ciclo de vendas Enterprise longo (> 30 dias)",mit:"Priorizar deals com dor urgente. Piloto de 15 dias sem compromisso para acelerar decisão."},
+              {risk:"SDR sem experiência em Enterprise B2B",mit:"Treinamento de 2 semanas antes de ativar cadência. Shadowing com Closer nas primeiras 10 reuniões."},
+              {risk:"Concorrência com players estabelecidos",mit:"Posicionamento como plataforma completa vs. soluções legadas. Ênfase em API moderna e SLA dedicado."},
+              {risk:"Budget travado em grandes empresas",mit:"Mapear orçamento na qualificação. Direcionar para área jurídica — centros de custo com verba dedicada."},
+              {risk:"Baixa conversão de inbound para Enterprise",mit:"Desqualificação imediata de tickets < R$ 3k. BDR com foco em qualidade, não volume."},
+            ].map((r,i)=>(
+              <FI key={i} delay={i*60}>
+                <Card cls="p-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div className="flex gap-3">
+                      <span className="text-red-400 shrink-0 mt-0.5">{icons.warn}</span>
+                      <div><p className="text-[10px] font-bold text-red-600 uppercase tracking-widest mb-1">Risco</p><p className="text-sm text-slate-700 font-medium">{r.risk}</p></div>
+                    </div>
+                    <div className="flex gap-3 md:border-l md:border-slate-100 md:pl-5">
+                      <span className="text-emerald-500 shrink-0 mt-0.5">{icons.badge}</span>
+                      <div><p className="text-[10px] font-bold text-emerald-600 uppercase tracking-widest mb-1">Mitigação</p><p className="text-sm text-slate-600">{r.mit}</p></div>
+                    </div>
+                  </div>
+                </Card>
+              </FI>
+            ))}
+          </div>
+        </section>
+
+        {/* 12 PRÓXIMOS PASSOS */}
+        <section className="space-y-8">
+          <FI><SectionHeader icon={icons.award} number="12" title="Próximos Passos — Semana a Semana"/></FI>
+          <div className="relative">
+            <div className="absolute left-8 top-0 bottom-0 w-px bg-slate-200 hidden md:block"/>
+            <div className="space-y-5">
+              {[
+                {week:"Semana 1",title:"Aprovação e Contratação",owner:"Liderança",items:["Aprovar orçamento de mídia Enterprise","Contratar SDR e BDR dedicados"]},
+                {week:"Semana 2",title:"Reposicionamento Digital",owner:"Marketing",items:["Redefinir copy e reativar canais com foco Enterprise","Construir listas ABM e configurar CRM"]},
+                {week:"Semana 3",title:"Treinamento e Cadências",owner:"Comercial",items:["Treinamento intensivo (produto + ICP + objeções)","Iniciar primeiras cadências outbound"]},
+                {week:"Semana 4",title:"Ativação Total",owner:"Marketing + SDR",items:["Ativar 100% das cadências outbound ABM","Publicar lead magnet e campanhas Enterprise"]},
+                {week:"Dia 30",title:"Revisão Estratégica",owner:"Liderança",items:["Primeira revisão de pipeline e ajuste de estratégia","Relatório de performance Mês 1"]},
+              ].map((s,i)=>(
+                <FI key={i} delay={i*80} cls="relative md:pl-20">
+                  <div className="absolute left-0 top-0 w-16 h-16 bg-white border-2 border-indigo-600 rounded-full hidden md:flex flex-col items-center justify-center font-bold text-indigo-600 z-10 text-center leading-tight">
+                    <span className="text-[9px] font-bold text-indigo-400">{i+1}</span>
+                    <span className="text-[10px] font-extrabold">{s.week.includes("Dia")?"D30":`S${i+1}`}</span>
+                  </div>
+                  <Card cls="p-7">
+                    <div className="flex items-start justify-between mb-4">
+                      <div>
+                        <p className="text-xs font-bold text-indigo-600 uppercase tracking-widest mb-1">{s.week}</p>
+                        <h4 className="text-lg font-bold">{s.title}</h4>
+                      </div>
+                      <span className="text-xs font-bold bg-slate-100 text-slate-500 px-3 py-1 rounded-full shrink-0 ml-3">{s.owner}</span>
+                    </div>
+                    <ul className="space-y-2">
+                      {s.items.map((item,j)=>(
+                        <li key={j} className="flex gap-2 text-sm text-slate-600">
+                          <span className="text-emerald-500 shrink-0 mt-0.5">{icons.check}</span>{item}
+                        </li>
+                      ))}
+                    </ul>
+                  </Card>
+                </FI>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* DIAGNÓSTICO FINAL */}
+        <FI>
+          <div className="bg-indigo-900 text-white p-12 rounded-3xl text-center relative overflow-hidden">
+            <div className="absolute inset-0 pointer-events-none" style={{background:"radial-gradient(ellipse at top right, rgba(99,102,241,0.25), transparent 60%)"}}/>
+            <div className="relative z-10 max-w-2xl mx-auto space-y-6">
+              <span className="text-indigo-400 block mx-auto" style={{width:36}}>{icons.shield}</span>
+              <h2 className="text-3xl font-bold">Diagnóstico Final</h2>
+              <p className="text-indigo-200 text-sm leading-relaxed">
+                Se a Liberado hoje só vende Start e Basic, o problema não é o tráfego — é a <strong className="text-white">arquitetura do funil</strong> e a <strong className="text-white">narrativa estratégica</strong>. Enterprise não compra "consulta". Compra <strong className="text-white">Governança, Blindagem e Segurança Institucional</strong>.
+              </p>
+              <div className="grid grid-cols-3 gap-4 pt-4">
+                {[{v:"40 reuniões",l:"em 90 dias"},{v:"8–12 contratos",l:"Enterprise fechados"},{v:"+ R$ 65k MRR",l:"adicionado"}].map((m,i)=>(
+                  <div key={i} className="p-4 bg-white/10 rounded-2xl border border-white/20">
+                    <p className="text-lg font-extrabold">{m.v}</p>
+                    <p className="text-xs text-indigo-300 mt-1">{m.l}</p>
+                  </div>
+                ))}
+              </div>
+              <div className="pt-6 border-t border-white/10">
+                <p className="text-[10px] font-bold uppercase tracking-widest opacity-50 mb-2">Emitido por</p>
+                <p className="text-lg font-serif italic mb-1">Senior Growth Marketing Analyst</p>
+                <p className="text-indigo-400 text-xs">Liberado — Estratégia Enterprise 2026</p>
+              </div>
+            </div>
+          </div>
+        </FI>
+
+      </main>
+      <footer className="border-t border-slate-200 py-8 text-center text-xs text-slate-400">
+        Liberado · Plano Estratégico Enterprise 90 Dias · Confidencial · 2026
+      </footer>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>
